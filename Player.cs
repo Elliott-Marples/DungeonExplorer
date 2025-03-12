@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace DungeonExplorer
 {
@@ -26,39 +29,38 @@ namespace DungeonExplorer
                 {
                     Console.WriteLine("\nName cannot be empty.");
                 }
+                if (value.Any(char.IsWhiteSpace))
+                {
+                    Console.WriteLine("\nName cannot contain spaces.");
+                }
+                else if (value.All(char.IsLetter) == false)
+                {
+                    Console.WriteLine("\nName cannot contain non-letter characters.");
+                }
 
                 else { _name = value; }
             }
         }
+
         public int Health
         {
             get { return _health; }
             set
             {
-                // If the value is less than 1 an appropriate message is printed
-                if (value < 1)
-                {
-                    Console.WriteLine("\nHealth cannot be zero or negative.");
-                }
-
-                else { _health = value; }
+                // If the value is less than 0 an appropriate message is printed
+                Debug.Assert(value >= 0, "\nHealth cannot be negative.");
+                _health = value;
             }
         }
+
         public int Attack
         {
             get { return _attack; }
             set
             {
-                // If the value is less than 1 an appropriate message is printed
-                if (value < 1)
-                {
-                    Console.WriteLine("\nAttack cannot be zero or negative.");
-                }
-
-                else
-                {
-                    _attack = value;
-                }
+                // If the value is less than 0 an appropriate message is printed
+                Debug.Assert(value >= 0, "\nAttack cannot be zero or negative.");
+                _attack = value;
             }
         }
         public int Happiness
@@ -66,16 +68,9 @@ namespace DungeonExplorer
             get { return _happiness; }
             set
             {
-                // If the value is less than 1 an appropriate message is printed
-                if (value < 1)
-                {
-                    Console.WriteLine("\nHappiness cannot be zero or negative.");
-                }
-
-                else
-                {
-                    _happiness = value;
-                }
+                // If the value is less than 0 an appropriate message is printed
+                Debug.Assert(value >= 0, "\nHappiness cannot be zero or negative.");
+                _happiness = value;
             }
         }
 
@@ -115,6 +110,7 @@ namespace DungeonExplorer
             {
                 // The equipped item is added back to the inventory
                 _inventory.Add(_equippedItem);
+                Console.WriteLine($"You have unequipped {_equippedItem}.");
 
                 // If the equipped item has an attack effect, the effect is removed
                 if (_equippedItemEffect == "attack")

@@ -144,6 +144,7 @@ namespace DungeonExplorer
             }
 
             // Updates the current room
+            currentRoom.Visited = true;
             currentRoom = roomMatrix[currentIndex[0], currentIndex[1]];
         }
 
@@ -191,6 +192,12 @@ namespace DungeonExplorer
                 // Clears the console and displays the player's options
                 Console.Clear();
                 Console.WriteLine("Enter:\n[E] to explore the room\n[S] to view your stats\n[I] to view your inventory\n[P] to pick up any items\n[U] to use/equip an item\n[M] to move to another room");
+
+                // If the room has been visited before, an appropriate message is displayed
+                if (currentRoom.Visited)
+                {
+                    Console.WriteLine("\nYou feel you have been here before.");
+                }
 
                 // Loops while the player has not moved between rooms
                 while (notMoved)
