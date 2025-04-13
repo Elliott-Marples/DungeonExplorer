@@ -13,10 +13,8 @@ namespace DungeonExplorer
         private int _health;
         private int _attack;
         private int _happiness;
-        private List<string> _inventory = new List<string>();
-        private string _equippedItem;
-        private string _equippedItemEffect;
-        private int _equippedItemEffectValue;
+        private Inventory _inventory = new Inventory();
+        private Item _equippedItem;
 
         // Public properties with getters and setters
         public string Name
@@ -74,6 +72,8 @@ namespace DungeonExplorer
             }
         }
 
+        public Inventory Inventory { get => _inventory; private set => _inventory = value; }
+
         // Constructor
         public Player(string name, int health, int attack)
         {
@@ -83,85 +83,45 @@ namespace DungeonExplorer
         }
 
         // Adds an item to the inventory
-        public void PickUpItem(string item)
+        public void PickUpItem(Item item)
         {
-            _inventory.Add(item);
+            Inventory.Add(item);
         }
 
         // Removes an item from the inventory when used
-        public void UseItem(string item)
+        public void UseItem(Item item)
         {
-            if (_inventory.Contains(item))
+            if (Inventory.Contains(item))
             {
-                _inventory.Remove(item);
+                Inventory.Remove(item);
+                item.Use(this);
+                Console.WriteLine($"You used the {item.Name}.\n{item.UseMessage}\n");
             }
 
             else
             {
-                Console.WriteLine("You don't have that item in your inventory.");
+                Console.WriteLine("You don't have that item in your inventory.\n");
             }
         }
 
         // Equips an item, applies its effects and adds the previously equipped item back to the inventory
-        public void EquipItem(string item, string effect, int effectValue)
+        public void EquipItem(Item item, string effect, int effectValue)
         {
             // Checks if the player has an item equipped
             if (_equippedItem != null)
             {
                 // The equipped item is added back to the inventory
-                _inventory.Add(_equippedItem);
+                Inventory.Add(_equippedItem);
                 Console.WriteLine($"You have unequipped {_equippedItem}.");
-
-                // If the equipped item has an attack effect, the effect is removed
-                if (_equippedItemEffect == "attack")
-                {
-                    Attack -= _equippedItemEffectValue;
-                }
-
-                // If the equipped item has a health effect, the effect is removed
-                else if (_equippedItemEffect == "health")
-                {
-                    Health -= _equippedItemEffectValue;
-                }
-
-                // If the equipped item has a happiness effect, the effect is removed
-                else if (_equippedItemEffect == "happiness")
-                {
-                    Happiness -= _equippedItemEffectValue;
-                }
             }
 
             // The new item is equipped and removed from the inventory
             _equippedItem = item;
             UseItem(item);
-
-            // If the new item has an attack effect, the effect is applied
-            if (effect == "attack")
-            {
-                Attack += effectValue;
-            }
-
-            // If the new item has a health effect, the effect is applied
-            else if (effect == "health")
-            {
-                Health += effectValue;
-            }
-
-            // If the new item has a happiness effect, the effect is applied
-            else if (effect == "happiness")
-            {
-                Happiness += effectValue;
-            }
-        }
-
-        // Returns the contents of the inventory
-        public string InventoryContents()
-        {
-            return string.Join(", ", _inventory);
         }
 
         // Returns the player's inventory
-        public string GetInventory()
+        public string GetInventoryString()
         {
             // A string containing the player's inventory is created
             string inventory_string = $"{Name}'s Inventory: ";
@@ -173,13 +133,13 @@ namespace DungeonExplorer
             }
 
             // If the player has items in their inventory, an appropriate message is returned
-            if (_inventory.Count != 0)
+            if (Inventory.Count != 0)
             {
-                inventory_string += $"\nContents: {InventoryContents()}";
+                //inventory_string += $"\nContents: {}";
             }
 
             // If the player has no items in their inventory, an appropriate message is returned
-            if (_equippedItem == null && _inventory.Count == 0)
+            if (_equippedItem == null && Inventory.Count == 0)
             {
                 return "There is nothing in your inventory.";
             }

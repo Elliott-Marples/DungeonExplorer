@@ -33,13 +33,14 @@ namespace DungeonExplorer
             // Creates all the rooms in the dungeon with an appropriate description and item
             Room entrance = new Room("a stone arch surrounding an entrance into the dungeon facing south.");
             Room room1 = new Room("an empty room with passages to the east and west.");
-            Room room2left = new Room("a room containing a treasure chest and a passage to the south.", item: "Sabre");
+            Room room2left = new Room("a room containing a treasure chest and a passage to the south.", item: Items.Sabre);
             Room room2right = new Room("a room containing a shadowed figure and a passage to the south.");
             Room room3left = new Room("a long passage heading south with unusual symbols carved into the walls.");
             Room room3right = new Room("a bridge heading south over an underground ravine.");
             Room room4left = new Room("a cave containing bats that won't let you past and a door to the east.");
-            Room room4right = new Room("a cave with a table of glass bottles filled with a mysterious liquid.", item: "Health Potion");
-            Room room5 = new Room("a chamber with doors to the east and west.\nThere's a closed metal gate to the south.\nIn front of the gate is a stone on a pedestal.", item: "Stone");
+            Room room4right = new Room("a cave with a table of glass bottles filled with a mysterious liquid.", item: Items.Potion);
+            Room room5 = new Room("a chamber with doors to the east and west.\nThere's a closed metal gate to the south." +
+                "\nIn front of the gate is a stone on a pedestal.", item: Items.Stone);
             Room finalRoom = new Room("a vast underground arena with a massive slime creature in the centre.", isAccessible: false);
             Room exit = new Room("Exit.");
 
@@ -148,35 +149,6 @@ namespace DungeonExplorer
             currentRoom = roomMatrix[currentIndex[0], currentIndex[1]];
         }
 
-        // Uses the item specified by the player
-        public void Use(string item)
-        {
-            string itemName;
-
-            // Checks the item the player has chosen and performs the appropriate action
-            if (item == "sa")
-            {
-                itemName = "Sabre";
-                Console.WriteLine("\nYou grab your sabre and feel prepared for battle");
-                player.EquipItem(itemName, "attack", 10);
-            }
-
-            else if (item == "he")
-            {
-                itemName = "Health Potion";
-                Console.WriteLine("\nYou drink the liquid in the bottle and see your wounds heal instantaneously");
-                player.Health += 20;
-                player.UseItem(itemName);
-            }
-
-            else if (item == "st")
-            {
-                itemName = "Stone";
-                Console.WriteLine("\nYou hold the stone. It makes you feel happy.");
-                player.EquipItem(itemName, "happiness", 1000);
-            }
-        }
-
         public void Start()
         {
             // Starts the main game loop
@@ -225,7 +197,7 @@ namespace DungeonExplorer
                     // If the player views their inventory, their inventory contents and equipped item are displayed
                     else if (action == "i")
                     {
-                        Console.WriteLine(player.GetInventory());
+                        Console.WriteLine(player.GetInventoryString());
                     }
 
                     // If the player picks up an item, the item is added to their inventory and removed from the room
@@ -246,18 +218,18 @@ namespace DungeonExplorer
                         else
                         {
                             // Prints an appropriate message depending on the item in the room
-                            if (currentRoom.Item == "Sabre")
+                            if (currentRoom.Item == Items.Sabre)
                             {
                                 Console.WriteLine("You open the treasure chest and find a Sabre.");
                             }
 
-                            else if (currentRoom.Item == "Health Potion")
+                            else if (currentRoom.Item == Items.Potion)
                             {
                                 Console.WriteLine("You pick up one of the bottles.");
                             }
 
                             // If the player picks up the stone, the metal gate opens, the room's description is updated and the room to the south becomes accessible
-                            else if (currentRoom.Item == "Stone")
+                            else if (currentRoom.Item == Items.Stone)
                             {
                                 Console.WriteLine("You pick up the stone.");
                                 Console.WriteLine("You watch the metal gate open, allowing you to traverse through it.");
@@ -274,38 +246,35 @@ namespace DungeonExplorer
                     // If the player uses an item, they are asked to choose an item from their inventory
                     else if (action == "u")
                     {
-                        // Splits the value returned from InventoryContents into an list of items
-                        string[] playerInventory = player.InventoryContents().Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
-                        List<string> playerInventoryList = new List<string>(playerInventory);
-                        List<string> playerInventoryLetters = new List<string>();
-
                         // Checks if the player has items in their inventory
-                        if (playerInventoryList.Count != 0)
+                        if (player.Inventory.Count != 0)
                         {
-                            // Displays the items in the player's inventory and denotes the first two letters of the item
-                            Console.WriteLine("You can use/equip:");
-                            foreach (string item in playerInventoryList)
+                            // Asks the player to input an item to use
+                            Console.WriteLine($"You can use:");
+                            for (int index = 0; index < player.Inventory.Count; index++)
                             {
-                                string itemLetters = $"{item[0]}{item[1]}";
-                                Console.WriteLine($"[{itemLetters}]{item.Substring(2)}");
-                                playerInventoryLetters.Add(itemLetters.ToLower());
+                                Console.WriteLine($"{index + 1}. {player.Inventory.Items[index].Name}");
                             }
+                            Console.Write("> ");
 
-                            // Asks the player which item they would like to use
-                            Console.Write("\nEnter the first two letters of the item you would like to use/equip.\n> ");
-                            string chosenItem = Console.ReadLine().ToLower().Trim(' ');
+                            // Gets the correspondent item to the user's input if valid
+                            if (int.TryParse(Console.ReadLine(), out int selectedItemIndex) && selectedItemIndex < player.Inventory.Count) {
+                                Item selectedItem = player.Inventory.Items[selectedItemIndex - 1];
 
-                            // Checks if the player has chosen a valid item to use
-                            if (playerInventoryLetters.Contains(chosenItem))
+                                // Uses the item
+                                player.UseItem(selectedItem);
+                            }
+                            // Prints error if user's input is invalid
+                            else
                             {
-                                Use(chosenItem);
+                                Console.WriteLine("You must enter a number corresponding to an item in your inventory.\n");
                             }
                         }
 
                         // If the player has no items in their inventory, an appropriate message is displayed
                         else
                         {
-                            Console.WriteLine("You have no items in your inventory.");
+                            Console.WriteLine("You have no items in your inventory.\n");
                         }
                     }
 

@@ -6,7 +6,7 @@ namespace DungeonExplorer
     {
         // Private properties
         private string _description;
-        private string _item;
+        private Item _item;
         private bool _isAccessible;
         private bool _visited;
 
@@ -17,7 +17,7 @@ namespace DungeonExplorer
             set { _description = value; }
         }
 
-        public string Item
+        public Item Item
         {
             get { return _item; }
             set { _item = value; }
@@ -36,7 +36,7 @@ namespace DungeonExplorer
         }
 
         // Constructor
-        public Room(string description, string item = null, bool isAccessible = true, bool visited = false)
+        public Room(string description, Item item = null, bool isAccessible = true, bool visited = false)
         {
             this.Description = description;
             this.Item = item;
