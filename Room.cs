@@ -5,13 +5,17 @@ namespace DungeonExplorer
     public class Room
     {
         // Private properties
+        private string _name;
         private string _description;
         private Item _item;
+        private Monster _monster;
         private bool _isAccessible;
         private bool _visited;
         private int[] _index;
 
         // Public properties with getters and setters
+        public string Name { get => _name; set => _name = value; }
+
         public string Description
         {
             get { return _description; }
@@ -37,12 +41,15 @@ namespace DungeonExplorer
         }
 
         public int[] Index { get => _index; set => _index = value; }
+        public Monster Monster { get => _monster; set => _monster = value; }
 
         // Constructor
-        public Room(string description, Item item = null, bool isAccessible = true, bool visited = false)
+        public Room(string name, string description, Item item = null, Monster monster = null, bool isAccessible = true, bool visited = false)
         {
+            this.Name = name;
             this.Description = description;
             this.Item = item;
+            this.Monster = monster;
             this.IsAccessible = isAccessible;
             this.Visited = visited;
         }

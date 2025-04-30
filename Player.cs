@@ -6,74 +6,15 @@ using System.Xml.Linq;
 
 namespace DungeonExplorer
 {
-    public class Player
+    public class Player : Creature
     {
         // Private properties
-        private string _name;
-        private int _health;
-        private int _attack;
-        private int _happiness;
         private Inventory _inventory = new Inventory();
         private Item _equippedItem;
         private Room _currentRoom;
         private int[] _currentRoomIndex;
 
         // Public properties with getters and setters
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                // If the value is null or empty an appropriate message is printed
-                if (string.IsNullOrEmpty(value))
-                {
-                    Console.WriteLine("\nName cannot be empty.");
-                }
-                if (value.Any(char.IsWhiteSpace))
-                {
-                    Console.WriteLine("\nName cannot contain spaces.");
-                }
-                else if (value.All(char.IsLetter) == false)
-                {
-                    Console.WriteLine("\nName cannot contain non-letter characters.");
-                }
-
-                else { _name = value; }
-            }
-        }
-
-        public int Health
-        {
-            get { return _health; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nHealth cannot be negative.");
-                _health = value;
-            }
-        }
-
-        public int Attack
-        {
-            get { return _attack; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nAttack cannot be zero or negative.");
-                _attack = value;
-            }
-        }
-        public int Happiness
-        {
-            get { return _happiness; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nHappiness cannot be zero or negative.");
-                _happiness = value;
-            }
-        }
-
         public Inventory Inventory { get => _inventory; private set => _inventory = value; }
         public Room CurrentRoom
         {
@@ -87,7 +28,7 @@ namespace DungeonExplorer
         public int[] CurrentRoomIndex { get => _currentRoomIndex; }
 
         // Constructor
-        public Player(string name, int health, int attack, Room startRoom)
+        public Player(string name, int health, int attack, Room startRoom) : base(name, health, attack)
         {
             this.Name = name;
             this.Health = health;
@@ -194,19 +135,22 @@ namespace DungeonExplorer
             return inventory_string;
         }
 
-        // Returns the player's stats
-        public string GetStats()
+        // Attacks a monster
+        public override void AttackTarget(Creature target)
         {
-            // A string containing the player's stats is created
-            string stats_string = $"{Name}'s Stats:\nHealth = {Health}\nAttack = {Attack}";
+            target.Health -= Attack;
+            Console.WriteLine($"You attacked the {target.Name}.\nYou dealt {Attack} damage.\n");
+        }
 
-            // If the player's happiness is not 0, an appropriate message is returned
-            if (Happiness != 0)
+        // Returns the player's stats
+        public override void DisplayStats()
+        {
+            base.DisplayStats();
+            Console.WriteLine($"# of Items: {Inventory.Count}");
+            if (_equippedItem != null)
             {
-                stats_string += $"\nHappiness = {Happiness}";
+                Console.WriteLine($"Equipped Item: {_equippedItem}");
             }
-
-            return stats_string;
         }
     }
 }

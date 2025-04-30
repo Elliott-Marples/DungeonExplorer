@@ -29,6 +29,8 @@ namespace DungeonExplorer
                 player = new Player(playerName, playerHealth, playerAttack, startRoom);
             }
 
+            Testing.AssertPlayerHasName(player);
+
             // Welcomes the player
             Console.WriteLine($"\nWelcome to the Dungeon, {player.Name}.\nPress any key to start.");
             Console.ReadKey();
@@ -46,15 +48,25 @@ namespace DungeonExplorer
                 bool notMoved = true;
                 bool exploredRoom = false;
 
+                //Testing.ChangeRoom(player, Rooms.room2right);
+                Testing.PrintPlayersCurrentRoom(player);
+
                 // Clears the console and displays the player's options
                 Console.Clear();
-                Console.WriteLine("Enter:\n[E] to explore the room\n[S] to view your stats\n[I] to view your inventory\n[P] to pick up any items\n[U] to use/equip an item\n[M] to move to another room");
+                Console.WriteLine("Enter:\n[E] to explore the room\n[S] to view your stats\n[I] to view your inventory\n[P] to pick up any items\n[U] to use/equip an item\n[A] to attack a monster\n[M] to move to another room");
 
                 // If the room has been visited before, an appropriate message is displayed
                 if (player.CurrentRoom.Visited)
                 {
                     Console.WriteLine("\nYou feel you have been here before.");
                 }
+
+                if (player.CurrentRoom.Monster != null)
+                {
+                    Console.WriteLine("\nYou feel you are not alone.");
+                }
+
+                Testing.PrintPlayersCurrentRoom(player);
 
                 // Loops while the player has not moved between rooms
                 while (notMoved)
@@ -76,7 +88,7 @@ namespace DungeonExplorer
                     // If the player views their stats, their name and health are displayed
                     else if (action == "s")
                     {
-                        Console.WriteLine(player.GetStats());
+                        player.DisplayStats();
                     }
 
                     // If the player views their inventory, their inventory contents and equipped item are displayed
@@ -102,28 +114,35 @@ namespace DungeonExplorer
 
                         else
                         {
+                            Testing.AssertRoomHasItem(player.CurrentRoom);
+
                             // Prints an appropriate message depending on the item in the room
-                            if (player.CurrentRoom.Item == Items.Sabre)
+                            if (player.CurrentRoom.Item == Items.sabre)
                             {
                                 Console.WriteLine("You open the treasure chest and find a Sabre.");
                             }
 
-                            else if (player.CurrentRoom.Item == Items.Potion)
+                            else if (player.CurrentRoom.Item == Items.potion)
                             {
                                 Console.WriteLine("You pick up one of the bottles.");
                             }
 
                             // If the player picks up the stone, the metal gate opens, the room's description is updated and the room to the south becomes accessible
-                            else if (player.CurrentRoom.Item == Items.Stone)
+                            else if (player.CurrentRoom.Item == Items.stone)
                             {
                                 Console.WriteLine("You pick up the stone.");
                                 Console.WriteLine("You watch the metal gate open, allowing you to traverse through it.");
                                 GameMap.roomMatrix[player.CurrentRoomIndex[0] + 1, player.CurrentRoomIndex[1]].IsAccessible = true;
                                 player.CurrentRoom.Description = "a chamber with doors to the east and west.\nThere's an open metal gate to the south.\nIn front of the gate is a pedestal.";
+
+                                Testing.AssertRoomIsAccessible(Rooms.finalRoom);
                             }
 
                             // Adds the item to the player's inventory and removes it from the room
                             player.PickUpItem(player.CurrentRoom.Item);
+                            
+                            Testing.AssertPlayerHasItem(player, player.CurrentRoom.Item);
+                            
                             player.CurrentRoom.Item = null;
                         }
                     }
@@ -143,7 +162,8 @@ namespace DungeonExplorer
                             Console.Write("> ");
 
                             // Gets the correspondent item to the user's input if valid
-                            if (int.TryParse(Console.ReadLine(), out int selectedItemIndex) && selectedItemIndex <= player.Inventory.Count && selectedItemIndex > 0) {
+                            if (int.TryParse(Console.ReadLine(), out int selectedItemIndex) && selectedItemIndex <= player.Inventory.Count && selectedItemIndex > 0)
+                            {
                                 Item selectedItem = player.Inventory.Items[selectedItemIndex - 1];
 
                                 // Uses the item
@@ -163,51 +183,76 @@ namespace DungeonExplorer
                         }
                     }
 
+                    else if (action == "a")
+                    {
+                        if (player.CurrentRoom.Monster == null)
+                        {
+                            Console.WriteLine("There isn't a monster in this room.\n");
+                        }
+                        else
+                        {
+                            player.AttackTarget(player.CurrentRoom.Monster);
+                        }
+                    }
+
                     else if (action == "m")
                     {
-                        // Gets the possible directions the player can move
-                        List<string> possibleDirections = Room.CheckDirections(player.CurrentRoomIndex);
-                        List<char> possibleDirectionsLetter = new List<char>();
-
-                        bool directionChosen = false;
-
-                        // Loops while the player has not chosen a direction to move
-                        while (directionChosen == false)
+                        // Checks if a monster is in the room
+                        if (player.CurrentRoom.Monster != null)
                         {
+                            Console.WriteLine($"The {player.CurrentRoom.Monster.Name} won't let you through.");
+                        }
+                        else
+                        {
+                            // Gets the possible directions the player can move
+                            List<string> possibleDirections = Room.CheckDirections(player.CurrentRoomIndex);
+                            List<char> possibleDirectionsLetter = new List<char>();
 
-                            // Displays the possible directions the player can move and denotes the first letter of the direction
-                            Console.WriteLine($"You can move:");
-                            foreach (string direction in possibleDirections)
+                            bool directionChosen = false;
+
+                            // Loops while the player has not chosen a direction to move
+                            while (directionChosen == false)
                             {
-                                Console.WriteLine($"[{direction[0]}]{direction.Substring(1)}");
-                                possibleDirectionsLetter.Add(direction.ToLower()[0]);
-                            }
 
-                            // Asks the player which direction they would like to move
-                            Console.Write("\nEnter the first letter of the direction you would like to move.\n> ");
-                            chosenDirection = Console.ReadLine().ToLower().Trim(' ');
+                                // Displays the possible directions the player can move and denotes the first letter of the direction
+                                Console.WriteLine($"You can move:");
+                                foreach (string direction in possibleDirections)
+                                {
+                                    Console.WriteLine($"[{direction[0]}]{direction.Substring(1)}");
+                                    possibleDirectionsLetter.Add(direction.ToLower()[0]);
+                                }
 
-                            if (chosenDirection.Length == 0)
-                            {
-                                chosenDirectionChar = ' ';
-                            }
+                                // Asks the player which direction they would like to move
+                                Console.Write("\nEnter the first letter of the direction you would like to move.\n> ");
+                                chosenDirection = Console.ReadLine().ToLower().Trim(' ');
 
-                            else
-                            {
-                                chosenDirectionChar = chosenDirection[0];
-                            }
+                                if (chosenDirection.Length == 0)
+                                {
+                                    chosenDirectionChar = ' ';
+                                }
 
-                            // Checks if the player has chosen a valid direction to move
-                            if (possibleDirectionsLetter.Contains(chosenDirectionChar))
-                            {
-                                player.MoveRoom(chosenDirectionChar);
-                                directionChosen = true;
-                                notMoved = false;
-                            }
+                                else
+                                {
+                                    chosenDirectionChar = chosenDirection[0];
+                                }
 
-                            else
-                            {
-                                Console.WriteLine("Cannot move in this direction.\n");
+                                // Checks if the player has chosen a valid direction to move
+                                if (possibleDirectionsLetter.Contains(chosenDirectionChar))
+                                {
+                                    Testing.PrintPlayersCurrentRoom(player);
+
+                                    player.MoveRoom(chosenDirectionChar);
+
+                                    Testing.PrintPlayersCurrentRoom(player);
+
+                                    directionChosen = true;
+                                    notMoved = false;
+                                }
+
+                                else
+                                {
+                                    Console.WriteLine("Cannot move in this direction.\n");
+                                }
                             }
                         }
                     }
@@ -218,10 +263,20 @@ namespace DungeonExplorer
                         playing = false;
                     }
 
-                    else if (player.Health <= 0)
+
+                    if (player.CurrentRoom.Monster != null && player.CurrentRoom.Monster.Health <= 0)
+                    {
+                        Console.WriteLine($"You defeated the {player.CurrentRoom.Monster.Name}.");
+                        player.CurrentRoom.Monster = null;
+                    }
+
+                    player.CurrentRoom.Monster?.AttackTarget(player);
+
+                    if (player.Health <= 0)
                     {
                         Console.WriteLine("\nUnlucky!\nYou ran out of health.");
                         playing = false;
+                        notMoved = false;
                     }
                 }
             }

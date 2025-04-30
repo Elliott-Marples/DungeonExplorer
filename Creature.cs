@@ -18,12 +18,15 @@ namespace DungeonExplorer
         public int Attack { get => _attack; set => _attack = value; }
         public int Happiness { get => _happiness; set => _happiness = value; }
 
-        public void DisplayStats()
+        public Creature(string name, int health, int attack)
         {
-            Console.WriteLine(GetStats());
+            this.Name = name;
+            this.Health = health;
+            this.Attack = attack;
         }
+
         public abstract void AttackTarget(Creature target);
-        public virtual string GetStats()
+        public virtual void DisplayStats()
         {
             // A string containing the creature's stats is created
             string stats_string = $"{Name}'s Stats:\nHealth = {Health}\nAttack = {Attack}";
@@ -34,7 +37,7 @@ namespace DungeonExplorer
                 stats_string += $"\nHappiness = {Happiness}";
             }
 
-            return stats_string;
+            Console.WriteLine(stats_string);
         }
     }
 }
