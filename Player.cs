@@ -15,6 +15,8 @@ namespace DungeonExplorer
         private int _happiness;
         private Inventory _inventory = new Inventory();
         private Item _equippedItem;
+        private Room _currentRoom;
+        private int[] _currentRoomIndex;
 
         // Public properties with getters and setters
         public string Name
@@ -73,13 +75,24 @@ namespace DungeonExplorer
         }
 
         public Inventory Inventory { get => _inventory; private set => _inventory = value; }
+        public Room CurrentRoom
+        {
+            get { return _currentRoom; }
+            set
+            {
+                _currentRoom = value;
+                _currentRoomIndex = GameMap.GetRoomIndex(value);
+            }
+        }
+        public int[] CurrentRoomIndex { get => _currentRoomIndex; }
 
         // Constructor
-        public Player(string name, int health, int attack)
+        public Player(string name, int health, int attack, Room startRoom)
         {
             this.Name = name;
             this.Health = health;
             this.Attack = attack;
+            this.CurrentRoom = startRoom;
         }
 
         // Adds an item to the inventory
@@ -118,6 +131,40 @@ namespace DungeonExplorer
             // The new item is equipped and removed from the inventory
             _equippedItem = item;
             UseItem(item);
+        }
+       
+        // Sets the player's current room
+        public void SetRoom(Room moveTo)
+        {
+            _currentRoom.Visited = true;
+            _currentRoom = moveTo;
+        }
+
+        // Moves the player to the room in the direction specified
+        public void MoveRoom(char direction)
+        {
+            // Updates currentIndex based on the direction the player has chosen
+            if (direction.Equals('n'))
+            {
+                _currentRoomIndex[0] -= 1;
+            }
+
+            else if (direction.Equals('s'))
+            {
+                _currentRoomIndex[0] += 1;
+            }
+
+            else if (direction.Equals('w'))
+            {
+                _currentRoomIndex[1] -= 1;
+            }
+
+            else if (direction.Equals('e'))
+            {
+                _currentRoomIndex[1] += 1;
+            }
+
+            SetRoom(GameMap.roomMatrix[_currentRoomIndex[0], _currentRoomIndex[1]]);
         }
 
         // Returns the player's inventory

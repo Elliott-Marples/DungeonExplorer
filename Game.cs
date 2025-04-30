@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Media;
 using System.Runtime.InteropServices;
@@ -11,9 +12,6 @@ namespace DungeonExplorer
     {
         // Private properties
         private Player player;
-        private Room currentRoom;
-        private int[] currentIndex;
-        private Room[,] roomMatrix;
 
         public Game()
         {
@@ -25,128 +23,15 @@ namespace DungeonExplorer
                 string playerName = Console.ReadLine();
                 int playerHealth = 100;
                 int playerAttack = 10;
+                Room startRoom = Rooms.entrance;
 
                 // Creates a new player with the name and health
-                player = new Player(playerName, playerHealth, playerAttack);
+                player = new Player(playerName, playerHealth, playerAttack, startRoom);
             }
-
-            // Creates all the rooms in the dungeon with an appropriate description and item
-            Room entrance = new Room("a stone arch surrounding an entrance into the dungeon facing south.");
-            Room room1 = new Room("an empty room with passages to the east and west.");
-            Room room2left = new Room("a room containing a treasure chest and a passage to the south.", item: Items.Sabre);
-            Room room2right = new Room("a room containing a shadowed figure and a passage to the south.");
-            Room room3left = new Room("a long passage heading south with unusual symbols carved into the walls.");
-            Room room3right = new Room("a bridge heading south over an underground ravine.");
-            Room room4left = new Room("a cave containing bats that won't let you past and a door to the east.");
-            Room room4right = new Room("a cave with a table of glass bottles filled with a mysterious liquid.", item: Items.Potion);
-            Room room5 = new Room("a chamber with doors to the east and west.\nThere's a closed metal gate to the south." +
-                "\nIn front of the gate is a stone on a pedestal.", item: Items.Stone);
-            Room finalRoom = new Room("a vast underground arena with a massive slime creature in the centre.", isAccessible: false);
-            Room exit = new Room("Exit.");
-
-            // Organises the rooms into a 2D array
-            roomMatrix = new Room[6, 3]
-            {
-                { null,         entrance,   null        },
-                { room2left,    room1,      room2right  },
-                { room3left,    null,       room3right  },
-                { room4left,    room5,      room4right  },
-                { null,         finalRoom,  null        },
-                { null,         exit,       null        }
-            };
-
-            // Sets the current room to the entrance
-            currentRoom = entrance;
-            currentIndex = new int[] { 0, 1 };
 
             // Welcomes the player
             Console.WriteLine($"\nWelcome to the Dungeon, {player.Name}.\nPress any key to start.");
             Console.ReadKey();
-        }
-
-        // Checks the possible directions the player can move
-        public List<string> CheckDirections()
-        {
-            // Creates a list which will contain possible directions the player can move from the current room
-            List<string> possibleDirections = new List<string>();
-
-            // Gets the index of the room to the north, south, west and east of the current room
-            int northIndex = currentIndex[0] - 1;
-            int southIndex = currentIndex[0] + 1;
-            int westIndex = currentIndex[1] - 1;
-            int eastIndex = currentIndex[1] + 1;
-
-            // Checks if the room to the north, south, west and east of the current room exists (and is accessible) and adds the direction to the list if it does
-            if (northIndex >= 0)
-            {
-                Room northRoom = roomMatrix[northIndex, currentIndex[1]];
-                if (northRoom != null && northRoom.IsAccessible)
-                {
-                    possibleDirections.Add("North");
-                }
-            }
-
-            if (southIndex < roomMatrix.GetLength(0))
-            {
-                Room southRoom = roomMatrix[southIndex, currentIndex[1]];
-
-                if (southRoom != null && southRoom.IsAccessible)
-                {
-                    possibleDirections.Add("South");
-                }
-            }
-
-            if (westIndex >= 0)
-            {
-                Room westRoom = roomMatrix[currentIndex[0], westIndex];
-
-                if (westRoom != null && westRoom.IsAccessible)
-                {
-                    possibleDirections.Add("West");
-                }
-            }
-
-            if (eastIndex < roomMatrix.GetLength(1))
-            {
-                Room eastRoom = roomMatrix[currentIndex[0], eastIndex];
-
-                if (eastRoom != null && eastRoom.IsAccessible)
-                {
-                    possibleDirections.Add("East");
-                }
-            }
-
-            // Returns the list of possible directions
-            return possibleDirections;
-        }
-
-        // Moves the player to the room in the direction specified
-        public void Move(char direction)
-        {
-            // Updates currentIndex based on the direction the player has chosen
-            if (direction.Equals('n'))
-            {
-                currentIndex[0] -= 1;
-            }
-
-            else if (direction.Equals('s'))
-            {
-                currentIndex[0] += 1;
-            }
-
-            else if (direction.Equals('w'))
-            {
-                currentIndex[1] -= 1;
-            }
-
-            else if (direction.Equals('e'))
-            {
-                currentIndex[1] += 1;
-            }
-
-            // Updates the current room
-            currentRoom.Visited = true;
-            currentRoom = roomMatrix[currentIndex[0], currentIndex[1]];
         }
 
         public void Start()
@@ -166,7 +51,7 @@ namespace DungeonExplorer
                 Console.WriteLine("Enter:\n[E] to explore the room\n[S] to view your stats\n[I] to view your inventory\n[P] to pick up any items\n[U] to use/equip an item\n[M] to move to another room");
 
                 // If the room has been visited before, an appropriate message is displayed
-                if (currentRoom.Visited)
+                if (player.CurrentRoom.Visited)
                 {
                     Console.WriteLine("\nYou feel you have been here before.");
                 }
@@ -184,7 +69,7 @@ namespace DungeonExplorer
                     // If the player explores the room, the room's description is displayed and exploredRoom is set to true
                     if (action == "e")
                     {
-                        Console.WriteLine($"You see {currentRoom.GetDescription()}");
+                        Console.WriteLine($"You see {player.CurrentRoom.GetDescription()}");
                         exploredRoom = true;
                     }
 
@@ -210,7 +95,7 @@ namespace DungeonExplorer
                         }
 
                         // Checks if the room has an item
-                        else if (currentRoom.Item == null)
+                        else if (player.CurrentRoom.Item == null)
                         {
                             Console.WriteLine("There are no items in this room.");
                         }
@@ -218,28 +103,28 @@ namespace DungeonExplorer
                         else
                         {
                             // Prints an appropriate message depending on the item in the room
-                            if (currentRoom.Item == Items.Sabre)
+                            if (player.CurrentRoom.Item == Items.Sabre)
                             {
                                 Console.WriteLine("You open the treasure chest and find a Sabre.");
                             }
 
-                            else if (currentRoom.Item == Items.Potion)
+                            else if (player.CurrentRoom.Item == Items.Potion)
                             {
                                 Console.WriteLine("You pick up one of the bottles.");
                             }
 
                             // If the player picks up the stone, the metal gate opens, the room's description is updated and the room to the south becomes accessible
-                            else if (currentRoom.Item == Items.Stone)
+                            else if (player.CurrentRoom.Item == Items.Stone)
                             {
                                 Console.WriteLine("You pick up the stone.");
                                 Console.WriteLine("You watch the metal gate open, allowing you to traverse through it.");
-                                roomMatrix[currentIndex[0] + 1, currentIndex[1]].IsAccessible = true;
-                                currentRoom.Description = "a chamber with doors to the east and west.\nThere's an open metal gate to the south.\nIn front of the gate is a pedestal.";
+                                GameMap.roomMatrix[player.CurrentRoomIndex[0] + 1, player.CurrentRoomIndex[1]].IsAccessible = true;
+                                player.CurrentRoom.Description = "a chamber with doors to the east and west.\nThere's an open metal gate to the south.\nIn front of the gate is a pedestal.";
                             }
 
                             // Adds the item to the player's inventory and removes it from the room
-                            player.PickUpItem(currentRoom.Item);
-                            currentRoom.Item = null;
+                            player.PickUpItem(player.CurrentRoom.Item);
+                            player.CurrentRoom.Item = null;
                         }
                     }
 
@@ -258,7 +143,7 @@ namespace DungeonExplorer
                             Console.Write("> ");
 
                             // Gets the correspondent item to the user's input if valid
-                            if (int.TryParse(Console.ReadLine(), out int selectedItemIndex) && selectedItemIndex < player.Inventory.Count) {
+                            if (int.TryParse(Console.ReadLine(), out int selectedItemIndex) && selectedItemIndex <= player.Inventory.Count && selectedItemIndex > 0) {
                                 Item selectedItem = player.Inventory.Items[selectedItemIndex - 1];
 
                                 // Uses the item
@@ -281,7 +166,7 @@ namespace DungeonExplorer
                     else if (action == "m")
                     {
                         // Gets the possible directions the player can move
-                        List<string> possibleDirections = CheckDirections();
+                        List<string> possibleDirections = Room.CheckDirections(player.CurrentRoomIndex);
                         List<char> possibleDirectionsLetter = new List<char>();
 
                         bool directionChosen = false;
@@ -315,7 +200,7 @@ namespace DungeonExplorer
                             // Checks if the player has chosen a valid direction to move
                             if (possibleDirectionsLetter.Contains(chosenDirectionChar))
                             {
-                                Move(chosenDirectionChar);
+                                player.MoveRoom(chosenDirectionChar);
                                 directionChosen = true;
                                 notMoved = false;
                             }
@@ -327,7 +212,7 @@ namespace DungeonExplorer
                         }
                     }
 
-                    if (currentRoom == roomMatrix[5, 1])
+                    if (player.CurrentRoom == GameMap.roomMatrix[5, 1])
                     {
                         Console.WriteLine("\nCongratulations!\nYou made it to the exit of the dungeon.\nThanks for playing.");
                         playing = false;

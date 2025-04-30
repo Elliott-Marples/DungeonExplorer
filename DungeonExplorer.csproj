@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Creature.cs" />
+    <Compile Include="Data\Rooms.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Data\Items.cs" />
     <Compile Include="Game.cs" />
@@ -51,6 +53,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />
+    <Compile Include="GameMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
