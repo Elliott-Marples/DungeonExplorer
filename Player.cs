@@ -2,184 +2,116 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace DungeonExplorer
 {
-    public class Player
+    public class Player : Creature<Monster>, IDamageable
     {
         // Private properties
-        private string _name;
-        private int _health;
-        private int _attack;
-        private int _happiness;
-        private List<string> _inventory = new List<string>();
-        private string _equippedItem;
-        private string _equippedItemEffect;
-        private int _equippedItemEffectValue;
+        private Inventory _inventory = new Inventory();
+        private Room _currentRoom;
+        private int[] _currentRoomIndex;
+        private static readonly Random random = new Random();
 
         // Public properties with getters and setters
-        public string Name
+        public Inventory Inventory { get => _inventory; private set => _inventory = value; }
+        public Room CurrentRoom
         {
-            get { return _name; }
+            get { return _currentRoom; }
             set
             {
-                // If the value is null or empty an appropriate message is printed
-                if (string.IsNullOrEmpty(value))
-                {
-                    Console.WriteLine("\nName cannot be empty.");
-                }
-                if (value.Any(char.IsWhiteSpace))
-                {
-                    Console.WriteLine("\nName cannot contain spaces.");
-                }
-                else if (value.All(char.IsLetter) == false)
-                {
-                    Console.WriteLine("\nName cannot contain non-letter characters.");
-                }
-
-                else { _name = value; }
+                _currentRoom = value;
+                _currentRoomIndex = GameMap.GetRoomIndex(value);
             }
         }
-
-        public int Health
-        {
-            get { return _health; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nHealth cannot be negative.");
-                _health = value;
-            }
-        }
-
-        public int Attack
-        {
-            get { return _attack; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nAttack cannot be zero or negative.");
-                _attack = value;
-            }
-        }
-        public int Happiness
-        {
-            get { return _happiness; }
-            set
-            {
-                // If the value is less than 0 an appropriate message is printed
-                Debug.Assert(value >= 0, "\nHappiness cannot be zero or negative.");
-                _happiness = value;
-            }
-        }
+        public int[] CurrentRoomIndex { get => _currentRoomIndex; }
 
         // Constructor
-        public Player(string name, int health, int attack)
+        public Player(string name, int health, int attack, Room startRoom) : base(name, health, attack)
         {
             this.Name = name;
             this.Health = health;
             this.Attack = attack;
+            this.CurrentRoom = startRoom;
         }
 
         // Adds an item to the inventory
-        public void PickUpItem(string item)
+        public void PickUpItem(Item item)
         {
-            _inventory.Add(item);
+            Inventory.Add(item);
         }
 
         // Removes an item from the inventory when used
-        public void UseItem(string item)
+        public void UseItem(Item item)
         {
-            if (_inventory.Contains(item))
+            if (Inventory.Contains(item))
             {
-                _inventory.Remove(item);
+                Inventory.Remove(item);
+                item.Use(this);
+                Console.WriteLine($"\nYou used the {item.Name}.\n{item.UseMessage}");
             }
 
             else
             {
-                Console.WriteLine("You don't have that item in your inventory.");
+                Console.WriteLine("\nYou don't have that item in your inventory.");
             }
         }
-
-        // Equips an item, applies its effects and adds the previously equipped item back to the inventory
-        public void EquipItem(string item, string effect, int effectValue)
+       
+        // Sets the player's current room
+        public void SetRoom(Room moveTo)
         {
-            // Checks if the player has an item equipped
-            if (_equippedItem != null)
-            {
-                // The equipped item is added back to the inventory
-                _inventory.Add(_equippedItem);
-                Console.WriteLine($"You have unequipped {_equippedItem}.");
-
-                // If the equipped item has an attack effect, the effect is removed
-                if (_equippedItemEffect == "attack")
-                {
-                    Attack -= _equippedItemEffectValue;
-                }
-
-                // If the equipped item has a health effect, the effect is removed
-                else if (_equippedItemEffect == "health")
-                {
-                    Health -= _equippedItemEffectValue;
-                }
-
-                // If the equipped item has a happiness effect, the effect is removed
-                else if (_equippedItemEffect == "happiness")
-                {
-                    Happiness -= _equippedItemEffectValue;
-                }
-            }
-
-            // The new item is equipped and removed from the inventory
-            _equippedItem = item;
-            UseItem(item);
-
-            // If the new item has an attack effect, the effect is applied
-            if (effect == "attack")
-            {
-                Attack += effectValue;
-            }
-
-            // If the new item has a health effect, the effect is applied
-            else if (effect == "health")
-            {
-                Health += effectValue;
-            }
-
-            // If the new item has a happiness effect, the effect is applied
-            else if (effect == "happiness")
-            {
-                Happiness += effectValue;
-            }
+            _currentRoom.Visited = true;
+            GameMap.visitedRooms.Add(_currentRoom);
+            _currentRoom = moveTo;
         }
 
-        // Returns the contents of the inventory
-        public string InventoryContents()
+        // Moves the player to the room in the direction specified
+        public void MoveRoom(char direction)
         {
-            return string.Join(", ", _inventory);
+            // Updates currentIndex based on the direction the player has chosen
+            if (direction.Equals('n'))
+            {
+                _currentRoomIndex[0] -= 1;
+            }
+
+            else if (direction.Equals('s'))
+            {
+                _currentRoomIndex[0] += 1;
+            }
+
+            else if (direction.Equals('w'))
+            {
+                _currentRoomIndex[1] -= 1;
+            }
+
+            else if (direction.Equals('e'))
+            {
+                _currentRoomIndex[1] += 1;
+            }
+
+            SetRoom(GameMap.roomMatrix[_currentRoomIndex[0], _currentRoomIndex[1]]);
         }
 
         // Returns the player's inventory
-        public string GetInventory()
+        public string GetInventoryString()
         {
             // A string containing the player's inventory is created
             string inventory_string = $"{Name}'s Inventory: ";
 
-            // If the player has an equipped item, an appropriate message is returned
-            if (_equippedItem != null)
-            {
-                inventory_string += $"\nEquipped Item: {_equippedItem}";
-            }
-
             // If the player has items in their inventory, an appropriate message is returned
-            if (_inventory.Count != 0)
+            if (Inventory.Count != 0)
             {
-                inventory_string += $"\nContents: {InventoryContents()}";
+                inventory_string += "\nContents: ";
+                foreach (Item item in _inventory.Items)
+                {
+                    inventory_string += item.Name;
+                }
             }
 
             // If the player has no items in their inventory, an appropriate message is returned
-            if (_equippedItem == null && _inventory.Count == 0)
+            if (Inventory.Count == 0)
             {
                 return "There is nothing in your inventory.";
             }
@@ -187,19 +119,37 @@ namespace DungeonExplorer
             return inventory_string;
         }
 
-        // Returns the player's stats
-        public string GetStats()
+        // Attacks a monster
+        public override void AttackTarget(Monster target)
         {
-            // A string containing the player's stats is created
-            string stats_string = $"{Name}'s Stats:\nHealth = {Health}\nAttack = {Attack}";
-
-            // If the player's happiness is not 0, an appropriate message is returned
-            if (Happiness != 0)
+            bool attackHit = true;
+            if (target.CanMiss)
             {
-                stats_string += $"\nHappiness = {Happiness}";
+                double result = random.NextDouble();
+                attackHit = (result >= 0.33);
             }
+            if (attackHit && target is IDamageable)
+            {
+                target.TakeDamage(Attack);
+                Console.WriteLine($"You attacked the {target.Name}.\nYou dealt {Attack} damage.\n");
+            }
+            else
+            {
+                Console.WriteLine($"The {target.Name} dodged your attack.\n");
+            }
+        }
 
-            return stats_string;
+        // Returns the player's stats
+        public override void DisplayStats()
+        {
+            base.DisplayStats();
+            Console.WriteLine($"# of Items: {Inventory.Count}");
+        }
+
+        // Decreases the player's health
+        public void TakeDamage(int damage)
+        {
+            Health -= damage;
         }
     }
 }
