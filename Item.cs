@@ -19,9 +19,42 @@ namespace DungeonExplorer
             _useMessage = useMessage;
         }
 
-        public string Name { get => _name; private set => _name = value; }
-        public string Description { get => _description; private set => _description = value; }
-        public string UseMessage { get => _useMessage; private set => _useMessage = value; }
+        public string Name
+        {
+            get => _name;
+            private set
+            {
+                if (String.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _name = value;
+            }
+        }
+        public string Description
+        {
+            get => _description;
+            private set
+            {
+                if (String.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _description = value;
+            }
+        }
+        public string UseMessage
+        {
+            get => _useMessage;
+            private set
+            {
+                if (String.IsNullOrWhiteSpace(value))
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _useMessage = value;
+            }
+        }
 
         public abstract void Use(Player player);
     }
@@ -35,7 +68,18 @@ namespace DungeonExplorer
             _attackDamage = attackDamage;
         }
 
-        public int AttackDamage { get => _attackDamage; private set => _attackDamage = value; }
+        public int AttackDamage
+        {
+            get => _attackDamage;
+            private set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                _attackDamage = value;
+            }
+        }
 
         public override void Use(Player player)
         {
@@ -52,7 +96,18 @@ namespace DungeonExplorer
             _healthRestoration = healthRestoration;
         }
 
-        public int HealthRestoration { get => _healthRestoration; private set => _healthRestoration = value; }
+        public int HealthRestoration
+        {
+            get => _healthRestoration;
+            private set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                _healthRestoration = value;
+            }
+        }
 
         public override void Use(Player player)
         {
@@ -62,18 +117,16 @@ namespace DungeonExplorer
 
     public class HappinessItem : Item
     {
-        private int _happinessModifier;
-
         public HappinessItem(string name, string description, string useMessage, int happinessModifier) : base(name, description, useMessage)
         {
             HappinessModifier = happinessModifier;
         }
 
-        public int HappinessModifier { get => _happinessModifier; private set => _happinessModifier = value; }
+        public int HappinessModifier { get; set; }
 
         public override void Use(Player player)
         {
-            player.Happiness += _happinessModifier;
+            player.Happiness += HappinessModifier;
         }
     }
 }

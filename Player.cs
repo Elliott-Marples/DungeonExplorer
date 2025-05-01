@@ -9,17 +9,15 @@ namespace DungeonExplorer
 {
     public class Player : Creature<Monster>, IDamageable
     {
-        // Private properties
-        private Inventory _inventory = new Inventory();
         private Room _currentRoom;
         private int[] _currentRoomIndex;
         private static readonly Random random = new Random();
 
         // Public properties with getters and setters
-        public Inventory Inventory { get => _inventory; private set => _inventory = value; }
+        public Inventory Inventory { get; private set; } = new Inventory();
         public Room CurrentRoom
         {
-            get { return _currentRoom; }
+            get => _currentRoom;
             set
             {
                 _currentRoom = value;
@@ -104,7 +102,7 @@ namespace DungeonExplorer
             if (Inventory.Count != 0)
             {
                 inventory_string += "\nContents: ";
-                foreach (Item item in _inventory.Items)
+                foreach (Item item in Inventory.Items)
                 {
                     inventory_string += item.Name;
                 }

@@ -9,27 +9,25 @@ namespace DungeonExplorer
 {
     public class Inventory : IEnumerable<Item>
     {
-        // Private Properties
-        private List<Item> _items;
 
         // Inventory Constructor
         public Inventory(List<Item> items = null)
         {
-            _items = items ?? new List<Item>();
+            Items = items ?? new List<Item>();
         }
 
         // Public Properties
-        public List<Item> Items { get => _items; private set => _items = value; }
-        public int Count => _items.Count;
+        public List<Item> Items { get; private set; }
+        public int Count => Items.Count;
 
         // Inventory Methods
-        public void Add(Item item) => _items.Add(item);
-        public void Remove(Item item) => _items.Remove(item);
-        public void Remove(int index) => _items.RemoveAt(index);
-        public bool Contains(Item item) => _items.Contains(item);
+        public void Add(Item item) => Items.Add(item);
+        public void Remove(Item item) => Items.Remove(item);
+        public void Remove(int index) => Items.RemoveAt(index);
+        public bool Contains(Item item) => Items.Contains(item);
 
         // Allows simple iteration through the inventory
-        public IEnumerator<Item> GetEnumerator() => _items.GetEnumerator();
+        public IEnumerator<Item> GetEnumerator() => Items.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

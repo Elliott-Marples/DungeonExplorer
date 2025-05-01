@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DungeonExplorer
 {
@@ -7,41 +8,37 @@ namespace DungeonExplorer
         // Private properties
         private string _name;
         private string _description;
-        private Item _item;
-        private Monster _monster;
-        private bool _isAccessible;
-        private bool _visited;
-        private int[] _index;
 
         // Public properties with getters and setters
-        public string Name { get => _name; set => _name = value; }
-
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _name = value;
+            }
+        }
         public string Description
         {
-            get { return _description; }
-            set { _description = value; }
+            get => _description;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _description = value;
+            }
         }
-
-        public Item Item
-        {
-            get { return _item; }
-            set { _item = value; }
-        }
-
-        public bool IsAccessible
-        {
-            get { return _isAccessible; }
-            set { _isAccessible = value; }
-        }
-
-        public bool Visited
-        {
-            get { return _visited; }
-            set { _visited = value; }
-        }
-
-        public int[] Index { get => _index; set => _index = value; }
-        public Monster Monster { get => _monster; set => _monster = value; }
+        public Item Item { get; set; }
+        public Monster Monster { get; set; }
+        public bool IsAccessible { get; set; }
+        public bool Visited { get; set; }
+        public int[] Index { get; private set; }
 
         // Constructor
         public Room(string name, string description, Item item = null, Monster monster = null, bool isAccessible = true, bool visited = false)
