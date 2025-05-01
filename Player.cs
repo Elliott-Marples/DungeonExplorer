@@ -11,7 +11,6 @@ namespace DungeonExplorer
     {
         // Private properties
         private Inventory _inventory = new Inventory();
-        private Item _equippedItem;
         private Room _currentRoom;
         private int[] _currentRoomIndex;
         private static readonly Random random = new Random();
@@ -51,35 +50,20 @@ namespace DungeonExplorer
             {
                 Inventory.Remove(item);
                 item.Use(this);
-                Console.WriteLine($"You used the {item.Name}.\n{item.UseMessage}\n");
+                Console.WriteLine($"\nYou used the {item.Name}.\n{item.UseMessage}");
             }
 
             else
             {
-                Console.WriteLine("You don't have that item in your inventory.\n");
+                Console.WriteLine("\nYou don't have that item in your inventory.");
             }
-        }
-
-        // Equips an item, applies its effects and adds the previously equipped item back to the inventory
-        public void EquipItem(Item item, string effect, int effectValue)
-        {
-            // Checks if the player has an item equipped
-            if (_equippedItem != null)
-            {
-                // The equipped item is added back to the inventory
-                Inventory.Add(_equippedItem);
-                Console.WriteLine($"You have unequipped {_equippedItem}.");
-            }
-
-            // The new item is equipped and removed from the inventory
-            _equippedItem = item;
-            UseItem(item);
         }
        
         // Sets the player's current room
         public void SetRoom(Room moveTo)
         {
             _currentRoom.Visited = true;
+            GameMap.visitedRooms.Add(_currentRoom);
             _currentRoom = moveTo;
         }
 
@@ -116,20 +100,18 @@ namespace DungeonExplorer
             // A string containing the player's inventory is created
             string inventory_string = $"{Name}'s Inventory: ";
 
-            // If the player has an equipped item, an appropriate message is returned
-            if (_equippedItem != null)
-            {
-                inventory_string += $"\nEquipped Item: {_equippedItem}";
-            }
-
             // If the player has items in their inventory, an appropriate message is returned
             if (Inventory.Count != 0)
             {
-                //inventory_string += $"\nContents: {}";
+                inventory_string += "\nContents: ";
+                foreach (Item item in _inventory.Items)
+                {
+                    inventory_string += item.Name;
+                }
             }
 
             // If the player has no items in their inventory, an appropriate message is returned
-            if (_equippedItem == null && Inventory.Count == 0)
+            if (Inventory.Count == 0)
             {
                 return "There is nothing in your inventory.";
             }
@@ -162,10 +144,6 @@ namespace DungeonExplorer
         {
             base.DisplayStats();
             Console.WriteLine($"# of Items: {Inventory.Count}");
-            if (_equippedItem != null)
-            {
-                Console.WriteLine($"Equipped Item: {_equippedItem}");
-            }
         }
 
         // Decreases the player's health

@@ -49,5 +49,25 @@ namespace DungeonExplorer
             }
             return null;
         }
+
+        // Returns list of rooms
+        public static List<Room> GetRoomList()
+        {
+            List<Room> roomList = new List<Room>();
+            foreach (Room room in roomMatrix)
+            {
+                roomList.Add(room);
+            }
+            return roomList;
+        }
+
+        // List of rooms with items
+        public static List<Room> visitedRooms = GetRoomList().Where(room => room != null && room.Visited == true).Select(room => room).ToList();
+
+        // List of rooms with items
+        public static List<Room> itemRooms = GetRoomList().Where(room => room != null && room.Item != null).Select(room => room).ToList();
+
+        // List of rooms with monsters
+        public static List<Room> monsterRooms = GetRoomList().Where(room => room != null && room.Monster != null).Select(room => room).ToList();
     }
 }

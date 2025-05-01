@@ -56,14 +56,19 @@ namespace DungeonExplorer
                 Console.WriteLine("Enter:\n[E] to explore the room\n[S] to view your stats\n[I] to view your inventory\n[P] to pick up any items\n[U] to use/equip an item\n[A] to attack a monster\n[M] to move to another room");
 
                 // If the room has been visited before, an appropriate message is displayed
-                if (player.CurrentRoom.Visited)
+                if (GameMap.visitedRooms.Contains(player.CurrentRoom))
                 {
                     Console.WriteLine("\nYou feel you have been here before.");
                 }
 
-                if (player.CurrentRoom.Monster != null)
+                if (GameMap.monsterRooms.Contains(player.CurrentRoom))
                 {
                     Console.WriteLine("\nYou feel you are not alone.");
+                }
+
+                if (GameMap.itemRooms.Contains(player.CurrentRoom))
+                {
+                    Console.WriteLine("\nYou feel that you may find something useful in here.");
                 }
 
                 Testing.PrintPlayersCurrentRoom(player);
@@ -171,14 +176,14 @@ namespace DungeonExplorer
                             // Prints error if user's input is invalid
                             else
                             {
-                                Console.WriteLine("You must enter a number corresponding to an item in your inventory.\n");
+                                Console.WriteLine("You must enter a number corresponding to an item in your inventory.");
                             }
                         }
 
                         // If the player has no items in their inventory, an appropriate message is displayed
                         else
                         {
-                            Console.WriteLine("You have no items in your inventory.\n");
+                            Console.WriteLine("You have no items in your inventory.");
                         }
                     }
 
