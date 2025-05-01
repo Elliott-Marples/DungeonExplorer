@@ -46,6 +46,7 @@
     <Compile Include="Creature.cs" />
     <Compile Include="Data\Monsters.cs" />
     <Compile Include="Data\Rooms.cs" />
+    <Compile Include="IDamageable.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Data\Items.cs" />
     <Compile Include="Game.cs" />

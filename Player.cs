@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace DungeonExplorer
 {
-    public class Player : Creature
+    public class Player : Creature<Monster>, IDamageable
     {
         // Private properties
         private Inventory _inventory = new Inventory();
         private Item _equippedItem;
         private Room _currentRoom;
         private int[] _currentRoomIndex;
+        private static readonly Random random = new Random();
 
         // Public properties with getters and setters
         public Inventory Inventory { get => _inventory; private set => _inventory = value; }
@@ -136,10 +138,23 @@ namespace DungeonExplorer
         }
 
         // Attacks a monster
-        public override void AttackTarget(Creature target)
+        public override void AttackTarget(Monster target)
         {
-            target.Health -= Attack;
-            Console.WriteLine($"You attacked the {target.Name}.\nYou dealt {Attack} damage.\n");
+            bool attackHit = true;
+            if (target.CanMiss)
+            {
+                double result = random.NextDouble();
+                attackHit = (result >= 0.33);
+            }
+            if (attackHit && target is IDamageable)
+            {
+                target.TakeDamage(Attack);
+                Console.WriteLine($"You attacked the {target.Name}.\nYou dealt {Attack} damage.\n");
+            }
+            else
+            {
+                Console.WriteLine($"The {target.Name} dodged your attack.\n");
+            }
         }
 
         // Returns the player's stats
@@ -151,6 +166,12 @@ namespace DungeonExplorer
             {
                 Console.WriteLine($"Equipped Item: {_equippedItem}");
             }
+        }
+
+        // Decreases the player's health
+        public void TakeDamage(int damage)
+        {
+            Health -= damage;
         }
     }
 }

@@ -21,13 +21,12 @@ namespace DungeonExplorer
 
         public static void PrintPlayersCurrentRoom(Player player)
         {
-            Debug.WriteLine(player.CurrentRoom.Name);
-            Debug.WriteLine($"X: {player.CurrentRoomIndex[1]}, Y: {player.CurrentRoomIndex[0]}");
+            Debug.WriteLine($"Room: {player.CurrentRoom.Name} @ {player.CurrentRoomIndex[1]}, {player.CurrentRoomIndex[0]}");
         }
 
         public static void PrintPlayersInput(string input)
         {
-            Debug.WriteLine(input);
+            Debug.WriteLine($"Input: {input}");
         }
 
         public static void AssertRoomHasItem(Room room)
@@ -48,6 +47,19 @@ namespace DungeonExplorer
         public static void AssertPlayerHasItem(Player player, Item item)
         {
             Debug.Assert(player.Inventory.Contains(item));
+        }
+
+        public static void PrintPlayerHealth(Player player, string msg = "")
+        {
+            Debug.WriteLine($"Player Health: {player.Health} " + msg);
+        }
+
+        public static void PrintMonsterHealth(Monster monster, string msg = "")
+        {
+            if (monster != null)
+            {
+                Debug.WriteLine($"Monster Health: {monster.Health} " + msg);
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ namespace DungeonExplorer
     internal class Game
     {
         // Private properties
-        private Player player;
+        private readonly Player player;
 
         public Game()
         {
@@ -134,7 +134,6 @@ namespace DungeonExplorer
                                 Console.WriteLine("You watch the metal gate open, allowing you to traverse through it.");
                                 GameMap.roomMatrix[player.CurrentRoomIndex[0] + 1, player.CurrentRoomIndex[1]].IsAccessible = true;
                                 player.CurrentRoom.Description = "a chamber with doors to the east and west.\nThere's an open metal gate to the south.\nIn front of the gate is a pedestal.";
-
                                 Testing.AssertRoomIsAccessible(Rooms.finalRoom);
                             }
 
@@ -191,7 +190,11 @@ namespace DungeonExplorer
                         }
                         else
                         {
+                            Testing.PrintPlayerHealth(player, msg: "@ Player Attack");
+                            Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Player Attack");
                             player.AttackTarget(player.CurrentRoom.Monster);
+                            Testing.PrintPlayerHealth(player, msg: "@ Player Attack");
+                            Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Player Attack");
                         }
                     }
 
@@ -240,9 +243,7 @@ namespace DungeonExplorer
                                 if (possibleDirectionsLetter.Contains(chosenDirectionChar))
                                 {
                                     Testing.PrintPlayersCurrentRoom(player);
-
                                     player.MoveRoom(chosenDirectionChar);
-
                                     Testing.PrintPlayersCurrentRoom(player);
 
                                     directionChosen = true;
@@ -270,7 +271,14 @@ namespace DungeonExplorer
                         player.CurrentRoom.Monster = null;
                     }
 
-                    player.CurrentRoom.Monster?.AttackTarget(player);
+                    Testing.PrintPlayerHealth(player, msg: "@ Monster Attack");
+                    Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Monster Attack");
+                    if (player.CurrentRoom.Monster != null && notMoved == true)
+                    {
+                        player.CurrentRoom.Monster.AttackTarget(player);
+                    }
+                    Testing.PrintPlayerHealth(player, msg: "@ Monster Attack");
+                    Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Monster Attack");
 
                     if (player.Health <= 0)
                     {

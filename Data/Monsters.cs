@@ -9,7 +9,7 @@ namespace DungeonExplorer
     public static class Monsters
     {
         public static Monster shadowed_figure = new Monster("Shadowed Figure", 25, 10);
-        public static Monster bats = new Monster("Bats", 50, 20);
-        public static Monster king_slime = new Monster("King Slime", 75, 25);
+        public static Monster bats = new Bats("Bats", 25, 10);
+        public static Monster king_slime = new Slime("King Slime", 75, 25);
     }
 }

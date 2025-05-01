@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DungeonExplorer
 {
-    public abstract class Creature
+    public abstract class Creature<Entity>
     {
         private string _name;
         private int _health;
@@ -17,6 +17,7 @@ namespace DungeonExplorer
         public int Health { get => _health; set => _health = value; }
         public int Attack { get => _attack; set => _attack = value; }
         public int Happiness { get => _happiness; set => _happiness = value; }
+        public virtual bool CanMiss { get => false; }
 
         public Creature(string name, int health, int attack)
         {
@@ -25,7 +26,7 @@ namespace DungeonExplorer
             this.Attack = attack;
         }
 
-        public abstract void AttackTarget(Creature target);
+        public abstract void AttackTarget(Entity target);
         public virtual void DisplayStats()
         {
             // A string containing the creature's stats is created
