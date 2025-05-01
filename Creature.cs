@@ -11,15 +11,26 @@ namespace DungeonExplorer
     {
         // Private properties
         private string _name;
-        private int _health;
-        private int _attack;
-        private int _happiness;
 
         // Public properties
-        public string Name { get => _name; set => _name = value; }
-        public int Health { get => _health; set => _health = value; }
-        public int Attack { get => _attack; set => _attack = value; }
-        public int Happiness { get => _happiness; set => _happiness = value; }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (String.IsNullOrWhiteSpace(value))
+                {
+                    Console.WriteLine("\nName must contain non-whitespace characters");
+                }
+                else
+                {
+                    _name = value;
+                }
+            }
+        }
+        public int Health { get; set; }
+        public int Attack { get; set; }
+        public int Happiness { get; set; }
 
         // Sets all subclasses CanMiss to false by default
         public virtual bool CanMiss { get => false; }
