@@ -8,7 +8,7 @@ namespace DungeonExplorer
 {
     public static class Rooms
     {
-        // Creates all the rooms in the dungeon with an appropriate description and item
+        // Creates all the rooms in the dungeon with an appropriate name, description, item, monster and accessibility
         public static Room entrance = new Room("entrance", "a stone arch surrounding an entrance into the dungeon facing south.");
         public static Room room1 = new Room("room1", "an empty room with passages to the east and west.");
         public static Room room2left = new Room("room2left", "a room containing a treasure chest and a passage to the south.", item: Items.sabre);

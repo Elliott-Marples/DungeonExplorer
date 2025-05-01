@@ -8,6 +8,7 @@ namespace DungeonExplorer
 {
     public interface IDamageable
     {
+        // Ensures all classes with this interface have a TakeDamage method
         void TakeDamage(int damage);
     }
 }

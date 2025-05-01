@@ -8,8 +8,9 @@ namespace DungeonExplorer
 {
     public static class Monsters
     {
+        // Creates all the monsters in the game with their stats
         public static Monster shadowed_figure = new Monster("Shadowed Figure", 25, 10);
-        public static Monster bats = new Bats("Bats", 25, 10);
-        public static Monster king_slime = new Slime("King Slime", 75, 25);
+        public static Bats bats = new Bats("Bats", 25, 10);
+        public static Slime king_slime = new Slime("King Slime", 75, 25);
     }
 }

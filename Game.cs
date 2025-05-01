@@ -61,11 +61,13 @@ namespace DungeonExplorer
                     Console.WriteLine("\nYou feel you have been here before.");
                 }
 
+                // If the room contains a monster, an approriate message is displayed
                 if (GameMap.monsterRooms.Contains(player.CurrentRoom))
                 {
                     Console.WriteLine("\nYou feel you are not alone.");
                 }
 
+                // If the room contains an item, an approriate message is displayed
                 if (GameMap.itemRooms.Contains(player.CurrentRoom))
                 {
                     Console.WriteLine("\nYou feel that you may find something useful in here.");
@@ -187,12 +189,16 @@ namespace DungeonExplorer
                         }
                     }
 
+                    // If the player attacks, the monster in their room takes damage
                     else if (action == "a")
                     {
+                        // Checks if the room contains a monster
                         if (player.CurrentRoom.Monster == null)
                         {
                             Console.WriteLine("There isn't a monster in this room.\n");
                         }
+
+                        // If the room contains a monster, the AttackTarget method is called with the monster in the room as a target
                         else
                         {
                             Testing.PrintPlayerHealth(player, msg: "@ Player Attack");
@@ -263,13 +269,14 @@ namespace DungeonExplorer
                         }
                     }
 
+                    // Checks if the player is in the final room and can therefore win the game
                     if (player.CurrentRoom == GameMap.roomMatrix[5, 1])
                     {
                         Console.WriteLine("\nCongratulations!\nYou made it to the exit of the dungeon.\nThanks for playing.");
                         playing = false;
                     }
 
-
+                    // Checks if the player has killed a monster in the current room
                     if (player.CurrentRoom.Monster != null && player.CurrentRoom.Monster.Health <= 0)
                     {
                         Console.WriteLine($"You defeated the {player.CurrentRoom.Monster.Name}.");
@@ -278,13 +285,18 @@ namespace DungeonExplorer
 
                     Testing.PrintPlayerHealth(player, msg: "@ Monster Attack");
                     Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Monster Attack");
+
+                    // Checks if their is a monster (after a player has used an action) in the room
                     if (player.CurrentRoom.Monster != null && notMoved == true)
                     {
+                        // If so, the monster attacks the player
                         player.CurrentRoom.Monster.AttackTarget(player);
                     }
+
                     Testing.PrintPlayerHealth(player, msg: "@ Monster Attack");
                     Testing.PrintMonsterHealth(player.CurrentRoom.Monster, msg: "@ Monster Attack");
 
+                    // Checks if the player has died and ends the game if so
                     if (player.Health <= 0)
                     {
                         Console.WriteLine("\nUnlucky!\nYou ran out of health.");

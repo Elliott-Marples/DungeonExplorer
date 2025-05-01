@@ -9,6 +9,7 @@ namespace DungeonExplorer
 {
     public static class GameMap
     {
+        // Defines the position of rooms using a 2d array
         public static Room[,] roomMatrix = new Room[6, 3]
         {
             {   null,               Rooms.entrance,     null                },
@@ -26,15 +27,6 @@ namespace DungeonExplorer
             int indexY = 0;
             foreach (Room room in roomMatrix)
             {
-                //if (room != null)
-                //{
-                //    Console.WriteLine(room.GetDescription());
-                //}
-                //else
-                //{
-                //    Console.WriteLine("null");
-                //}
-                //Console.WriteLine($"{index[0]}, {index[1]}");
                 if (room == queriedRoom)
                 {
                     int[] index = { indexY, indexX };
